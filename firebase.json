@@ -1,0 +1,14 @@
+{
+  "hosting": {
+    "public": "financial-dashboard",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "predeploy": [
+      "npm --prefix financial-dashboard install",
+      "npm --prefix financial-dashboard run build"
+    ]
+  }
+}
