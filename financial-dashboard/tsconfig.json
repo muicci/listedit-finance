@@ -14,8 +14,9 @@
     "jsx": "preserve",
     "incremental": true,
     "types": [],
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["financial-dashboard/src/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
