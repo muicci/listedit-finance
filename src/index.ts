@@ -1,7 +1,1 @@
-export default {
-  async fetch(request: Request): Promise<Response> {
-    return new Response('Hello from Cloudflare Worker!', {
-      headers: { 'content-type': 'text/plain' },
-    });
-  },
-};
+//// This file is not needed for the pure app, clearing content

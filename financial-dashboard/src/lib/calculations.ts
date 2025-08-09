@@ -1,3 +1,7 @@
+/**
+ * Calculation utilities for Listedit Dashboard
+ */
+
 import { ListeditState, CalculatedMetrics, AGENT_COUNTS } from '@/types/listedit'
 
 export function calculateMetrics(state: ListeditState): CalculatedMetrics {

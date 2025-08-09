@@ -1,7 +1,9 @@
 import React from 'react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { cn } from '@/lib/utils'
+function cn(...classes: (string | undefined | false)[]): string {
+  return classes.filter(Boolean).join(' ')
+}
 import { AlertCircle, CheckCircle, InfoIcon, TrendingUp, TrendingDown } from 'lucide-react'
 
 interface InsightCalloutProps {

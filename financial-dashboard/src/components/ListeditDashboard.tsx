@@ -2,12 +2,9 @@
 
 import React from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { RefreshCw } from 'lucide-react'
 import { useListedit } from '@/contexts/ListeditContext'
-import { Currency, CURRENCY_SYMBOLS } from '@/types/listedit'
 import { DashboardTab } from '@/components/tabs/DashboardTab'
 import { InputsTab } from '@/components/tabs/InputsTab'
 import { NumbersTab } from '@/components/tabs/NumbersTab'
@@ -15,7 +12,7 @@ import { ValuationTab } from '@/components/tabs/ValuationTab'
 import { AllocationTab } from '@/components/tabs/AllocationTab'
 
 export function ListeditDashboard() {
-  const { state, updateCurrency, resetToDefaults } = useListedit()
+  const { resetToDefaults } = useListedit()
 
   return (
     <div className="min-h-screen bg-background">
