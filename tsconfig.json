@@ -20,7 +20,7 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["financial-dashboard/src/*"]
+      "@/*": ["src/*"]
     },
     "types": []
   },
