@@ -233,7 +233,7 @@ export const QUICK_WIN_TWEAKS = {
   },
   'increase-low-uplift': {
     label: 'Increase Low uplift by +10pp',
-    changes: { lowSegmentUplift: 0 } as Partial<ListeditState> // Replace function with a placeholder number, adjust logic as needed
+    changes: (state: ListeditState) => ({ lowSegmentUplift: Math.min(100, state.lowSegmentUplift + 10) }) as Partial<ListeditState>
   },
   'raise-replace': {
     label: 'Raise Replace% to 60%',
@@ -245,6 +245,6 @@ export const QUICK_WIN_TWEAKS = {
   },
   'shift-to-team': {
     label: 'Shift 5% to Team',
-    changes: { allocationTeam: 0 } as Partial<ListeditState> // Replace function with a placeholder number, adjust logic as needed
+    changes: (state: ListeditState) => ({ allocationTeam: Math.min(100, state.allocationTeam + 5) }) as Partial<ListeditState>
   }
 }
