@@ -26,11 +26,10 @@ export default function FinancialChart({
   const chartRef = useRef<any>(null)
 
   useEffect(() => {
-    let Chart: any
     // dynamically import Chart.js to avoid SSR issues
     import('chart.js/auto')
-      .then((c) => {
-        Chart = c
+      .then((mod) => {
+        const Chart = (mod && (mod.default ?? mod)) as any
         if (!canvasRef.current) return
         const ctx = canvasRef.current.getContext('2d')
         if (!ctx) return
@@ -40,7 +39,7 @@ export default function FinancialChart({
           chartRef.current.destroy()
         }
 
-        chartRef.current = new (Chart && Chart.Chart)(ctx, {
+        chartRef.current = new Chart(ctx, {
           type: chartType || 'bar',
           data: {
             labels,
