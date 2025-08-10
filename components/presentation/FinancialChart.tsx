@@ -2,6 +2,32 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import React, { useEffect, useRef } from 'react'
+import {
+  Chart,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
+  BarController,
+  LineController,
+  Tooltip,
+  Legend,
+  Title,
+} from 'chart.js'
+
+Chart.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
+  BarController,
+  LineController,
+  Tooltip,
+  Legend,
+  Title
+)
 
 type Dataset = {
   label: string
@@ -27,68 +53,58 @@ export default function FinancialChart({
   const chartRef = useRef<any>(null)
 
   useEffect(() => {
-    // dynamically import Chart.js to avoid SSR issues
-    import('chart.js/auto')
-      .then((mod) => {
-        const Chart = (mod && (mod.default ?? mod)) as any
-        if (!canvasRef.current) return
-        const ctx = canvasRef.current.getContext('2d')
-        if (!ctx) return
+    if (!canvasRef.current) return
+    const ctx = canvasRef.current.getContext('2d')
+    if (!ctx) return
 
-        // cleanup previous
-        if (chartRef.current) {
-          chartRef.current.destroy()
-        }
+    // cleanup previous
+    if (chartRef.current) {
+      chartRef.current.destroy()
+    }
 
-        chartRef.current = new Chart(ctx, {
-          type: chartType || 'bar',
-          data: {
-            labels,
-            datasets: datasets.map((d) => ({
-              label: d.label,
-              data: d.data,
-              backgroundColor: d.backgroundColor || '#0D1C17',
-              borderColor: d.borderColor || d.backgroundColor || '#0D1C17',
-              borderWidth: 1,
-              fill: chartType === 'line' ? false : undefined,
-            })),
+    chartRef.current = new (Chart as any)(ctx, {
+      type: chartType || 'bar',
+      data: {
+        labels,
+        datasets: datasets.map((d) => ({
+          label: d.label,
+          data: d.data,
+          backgroundColor: d.backgroundColor || '#0D1C17',
+          borderColor: d.borderColor || d.backgroundColor || '#0D1C17',
+          borderWidth: 1,
+          fill: chartType === 'line' ? false : undefined,
+        })),
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
           },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                position: 'bottom',
-              },
-              tooltip: {
-                callbacks: {
-                  label: function (context: any) {
-                    const val = context.parsed.y ?? context.parsed
-                    return typeof val === 'number' ? `A$${val.toLocaleString()}` : val
-                  },
-                },
+          tooltip: {
+            callbacks: {
+              label: function (context: any) {
+                const val = context.parsed.y ?? context.parsed
+                return typeof val === 'number' ? `A$${val.toLocaleString()}` : val
               },
             },
-            scales: {
-              y: {
-                beginAtZero: true,
-                ticks: {
-                  callback: function (value: any) {
-                    if (typeof value === 'number') return 'A$' + value.toLocaleString()
-                    return value
-                  },
-                },
+          },
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: function (value: any) {
+                if (typeof value === 'number') return 'A$' + value.toLocaleString()
+                return value
               },
             },
-            ...(options || {}),
           },
-        })
-      })
-      .catch((err) => {
-        // ignore - Chart will not render
-        // eslint-disable-next-line no-console
-        console.error('Failed to load chart.js', err)
-      })
+        },
+        ...(options || {}),
+      },
+    })
 
     return () => {
       if (chartRef.current) {
