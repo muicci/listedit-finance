@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# generated Tailwind output
+/styles/tw.css
+/public/tw.css
+
+# backup files
+*.bak
