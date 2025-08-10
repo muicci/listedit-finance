@@ -1,4 +1,5 @@
 'use client'
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import React, { useEffect, useMemo, useState } from 'react'
 import Slide from './Slide'
@@ -281,6 +282,15 @@ export default function Presentation() {
   // keyboard navigation
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
+      // Ignore navigation keys when the user is typing in form controls
+      const target = e.target as HTMLElement | null
+      if (target) {
+        const tag = target.tagName
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (target as HTMLElement).isContentEditable) {
+          return
+        }
+      }
+
       if (e.key === 'ArrowRight') {
         setIndex((i) => Math.min(total - 1, i + 1))
       } else if (e.key === 'ArrowLeft') {
