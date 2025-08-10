@@ -186,3 +186,14 @@
   --shadow-xl: var(--shadow-xl);
   --shadow-2xl: var(--shadow-2xl);
 }
+
+/* Hide horizontal scrollbar for overflow-x areas (utility used in the project) */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+/* WebKit browsers (Chrome, Safari, Edge Chromium) — hide the horizontal track */
+.scrollbar-hide::-webkit-scrollbar {
+  height: 0; /* hides horizontal scrollbar */
+}
