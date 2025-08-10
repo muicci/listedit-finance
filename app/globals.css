@@ -188,3 +188,13 @@
     letter-spacing: var(--tracking-normal);
   }
 }
+
+/* hide scrollbars but keep scrolling */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+  height: 0; /* ensure horizontal scrollbar is hidden */
+}
