@@ -1,12 +1,39 @@
 'use client'
 
-import React, { useState } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import React, { useMemo, useState } from 'react'
+import {
+  Card, CardContent, CardDescription, CardHeader, CardTitle
+} from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { useListedit } from '@/contexts/ListeditContext'
-import { formatCurrency, formatPercentage, generateValuationData } from '@/lib/calculations'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
+import {
+  formatCurrency,
+  formatPercentage,
+  generateValuationData
+} from '@/lib/calculations'
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  LabelList,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  AreaChart,
+  Area,
+  RadialBarChart,
+  RadialBar,
+  PolarAngleAxis,
+  ComposedChart
+} from 'recharts'
 import { TrendingUp, TrendingDown, DollarSign, Target, Zap } from 'lucide-react'
+
+type Scenario = 'without' | 'with'
 
 interface MetricCardProps {
   title: string
@@ -15,222 +42,472 @@ interface MetricCardProps {
   isPositive?: boolean
   icon: React.ReactNode
   description?: string
+  accent?: string
 }
 
-function MetricCard({ title, value, change, isPositive, icon, description }: MetricCardProps) {
+function hexToRgba(hex: string, alpha: number) {
+  const m = hex.replace('#','');
+  const bigint = parseInt(m.length === 3 ? m.split('').map(c => c + c).join('') : m, 16);
+  const r = (bigint >> 16) & 255;
+  const g = (bigint >> 8) & 255;
+  const b = bigint & 255;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+/**
+ * Solid color palette (hex) to avoid SVGs falling back to black.
+ * These are tuned to your theme.
+ */
+const PALETTE = {
+  green: '#16a34a', // chart-1
+  blue: '#2563eb',  // chart-2
+  purple: '#7c3aed',// chart-3
+  amber: '#f59e0b', // chart-4
+  sky: '#0ea5e9',   // chart-5
+  gray: '#e5e7eb',  // grid/borders
+  ink: '#111827',   // tooltip text
+  card: '#ffffff'   // tooltip bg (light)
+}
+
+const GRID_STROKE = PALETTE.gray
+
+function MetricCard({ title, value, change, isPositive, icon, description, accent = '#2563eb' }: MetricCardProps) {
+  const tintBg = hexToRgba(accent, 0.08);
+  const tintHeader = hexToRgba(accent, 0.06);
+  const tintBorder = hexToRgba(accent, 0.25);
+  const textAccent = accent;
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        {icon}
+    <Card
+      className="border shadow-sm hover:shadow-md transition-shadow rounded-xl overflow-hidden"
+      style={{
+        borderColor: tintBorder,
+        background: `linear-gradient(180deg, ${tintBg} 0%, #ffffff 55%)`
+      }}
+    >
+      <CardHeader
+        className="pb-3 border-b rounded-t-xl"
+        style={{ borderColor: hexToRgba(accent, 0.18), background: tintHeader }}
+      >
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-sm font-medium tracking-tight">{title}</CardTitle>
+          <div
+            className="w-7 h-7 rounded-lg flex items-center justify-center"
+            style={{ background: hexToRgba(accent, 0.15), color: textAccent }}
+          >
+            {icon}
+          </div>
+        </div>
       </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
+      <CardContent className="pt-3">
+        <div className="text-2xl font-semibold tracking-tight">{value}</div>
         {change && (
-          <p className={`text-xs flex items-center mt-1 ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-            {isPositive ? <TrendingUp className="w-4 h-4 mr-1" /> : <TrendingDown className="w-4 h-4 mr-1" />}
+          <p
+            className="text-xs flex items-center mt-1 font-medium"
+            style={{ color: isPositive ? textAccent : '#dc2626' }}
+          >
+            {isPositive ? (
+              <TrendingUp className="w-4 h-4 mr-1" />
+            ) : (
+              <TrendingDown className="w-4 h-4 mr-1" />
+            )}
             {change}
           </p>
         )}
-        {description && (
-          <p className="text-xs text-muted-foreground mt-1">{description}</p>
-        )}
+        {description && <p className="text-xs text-muted-foreground mt-1">{description}</p>}
       </CardContent>
     </Card>
   )
 }
 
+function SegmentedToggle({
+  value,
+  onChange,
+}: {
+  value: Scenario
+  onChange: (v: Scenario) => void
+}) {
+  const items: { key: Scenario; label: string }[] = [
+    { key: 'without', label: 'Without Listedit' },
+    { key: 'with', label: 'With Listedit' },
+  ]
+  return (
+    <div className="inline-flex rounded-xl border border-gray-200 bg-white p-1 shadow-sm">
+      {items.map((it) => {
+        const active = it.key === value
+        const isWith = it.key === 'with'
+        const bg = active ? (isWith ? '#16a34a' : '#f43f5e') : 'var(--color-muted)'
+        const fg = active ? '#ffffff' : 'var(--color-foreground)'
+        return (
+          <button
+            key={it.key}
+            type="button"
+            aria-pressed={active}
+            onClick={() => onChange(it.key)}
+            className="px-3 py-1.5 text-sm rounded-lg font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
+            style={{ background: bg, color: fg }}
+          >
+            {it.label}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+/** Recharts helpers **/
+function CurrencyTooltip({ active, payload, label, currency }: any) {
+  if (!active || !payload?.length) return null
+  return (
+    <div
+      style={{
+        background: PALETTE.card,
+        color: PALETTE.ink,
+        border: `1px solid ${PALETTE.gray}`,
+        borderRadius: 10,
+        padding: '10px 12px',
+        boxShadow: '0 8px 24px rgba(0,0,0,.12)'
+      }}
+    >
+      <div className="text-xs opacity-70" style={{ marginBottom: 6 }}>{label}</div>
+      {payload.map((p: any) => (
+        <div key={p.dataKey} className="text-sm" style={{ lineHeight: 1.3 }}>
+          <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ background: p.color }} />
+          {p.name}: <span className="font-medium">{formatCurrency(p.value, currency)}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function toPercent(v?: number) {
+  const n = Number(v ?? 0)
+  if (!isFinite(n)) return 0
+  // If the number looks like 0.435 => 43.5%, otherwise assume it's already a percent
+  return n <= 1 ? n * 100 : n
+}
+
 export function DashboardTab() {
   const { state, metrics } = useListedit()
-  const [showWithListedit, setShowWithListedit] = useState(true)
+  const [scenario, setScenario] = useState<Scenario>('with')
+  const showWith = scenario === 'with'
+  const beforeMarginPct = Math.max(0, Math.min(100, Math.round(toPercent(metrics.profitMarginBefore))))
+  const afterMarginPct  = Math.max(0, Math.min(100, Math.round(toPercent(metrics.profitMarginAfter))))
 
-  // --- BUG FIX 1: Corrected chart data ---
-  // The 'before' and 'after' values should not be swapped by the toggle.
-  // This chart's purpose is to always show a direct comparison.
+  /** DATA **/
   const costComparisonData = [
-    {
-      category: 'Software & Services',
-      before: metrics.softwareCostBefore,
-      after: metrics.softwareCostAfter
-    },
-    {
-      category: 'Repetitive Tasks',
-      before: metrics.repetitiveCostBefore,
-      after: metrics.repetitiveCostAfter
-    },
-    {
-      category: 'Human Costs',
-      before: metrics.humanCostBefore,
-      after: metrics.humanCostAfter
-    }
+    { category: 'Software & Services', before: metrics.softwareCostBefore, after: metrics.softwareCostAfter },
+    { category: 'Repetitive Tasks',   before: metrics.repetitiveCostBefore, after: metrics.repetitiveCostAfter },
+    { category: 'Human Costs',        before: metrics.humanCostBefore,      after: metrics.humanCostAfter }
   ]
 
-  // This data correctly toggles between the two scenarios
   const profitTrendData = [
     {
-      scenario: showWithListedit ? 'With Listedit' : 'Without Listedit',
-      revenue: showWithListedit ? metrics.revenueTotalAfter : metrics.revenueTotalBefore,
-      costs: showWithListedit ? metrics.totalCostAfter : metrics.totalCostBefore,
-      profit: showWithListedit ? metrics.profitAfter : metrics.profitBefore
+      scenario: showWith ? 'With Listedit' : 'Without Listedit',
+      revenue: showWith ? metrics.revenueTotalAfter : metrics.revenueTotalBefore,
+      profit:  showWith ? metrics.profitAfter        : metrics.profitBefore,
     }
   ]
 
-  // This data is only relevant when showing the impact of Listedit
   const impactBreakdownData = [
-    { name: 'Revenue Increase', value: metrics.revenuIncrease, fill: '#10b981' },
-    { name: 'Cost Savings', value: metrics.costSavings, fill: '#3b82f6' },
-    { name: 'Existing Profit', value: metrics.profitBefore, fill: '#6b7280' }
+    { name: 'Revenue Increase', value: metrics.revenuIncrease, fill: PALETTE.green },
+    { name: 'Cost Savings',     value: metrics.costSavings,   fill: PALETTE.blue },
+    { name: 'Existing Profit',  value: metrics.profitBefore,  fill: PALETTE.amber },
   ]
 
-  // This data is a projection based on the "With Listedit" scenario
-  const valuationData = generateValuationData(100, 1000, 100, state.annualPricePerClient, state.arrMultiple)
+  const valuationData = useMemo(
+    () => generateValuationData(100, 1000, 100, state.annualPricePerClient, state.arrMultiple),
+    [state.annualPricePerClient, state.arrMultiple]
+  )
 
+  const monthlyProjection = useMemo(() => {
+    const months = Array.from({ length: 12 }, (_, i) => i + 1)
+    const baseRev = (showWith ? metrics.revenueTotalAfter : metrics.revenueTotalBefore) / 12
+    const baseProf = (showWith ? metrics.profitAfter : metrics.profitBefore) / 12
+    return months.map((m) => ({
+      m: `M${m}`,
+      revenue: baseRev * (1 + m * 0.01),
+      profit: baseProf * (1 + m * 0.012),
+    }))
+  }, [metrics, showWith])
+
+  const beforeAfterStacked = [
+    { label: 'Before', Software: metrics.softwareCostBefore, Repetitive: metrics.repetitiveCostBefore, Human: metrics.humanCostBefore },
+    { label: 'After',  Software: metrics.softwareCostAfter,  Repetitive: metrics.repetitiveCostAfter,  Human: metrics.humanCostAfter },
+  ]
+
+  const beforeAfterNormalized = useMemo(() => {
+    const rows = [
+      { label: 'Before', Software: metrics.softwareCostBefore, Repetitive: metrics.repetitiveCostBefore, Human: metrics.humanCostBefore },
+      { label: 'After',  Software: metrics.softwareCostAfter,  Repetitive: metrics.repetitiveCostAfter,  Human: metrics.humanCostAfter },
+    ]
+    return rows.map(r => {
+      const total = (r.Software || 0) + (r.Repetitive || 0) + (r.Human || 0) || 1
+      return {
+        label: r.label,
+        Software: Math.round((r.Software / total) * 100),
+        Repetitive: Math.round((r.Repetitive / total) * 100),
+        Human: Math.round((r.Human / total) * 100),
+      }
+    })
+  }, [metrics.softwareCostBefore, metrics.softwareCostAfter, metrics.repetitiveCostBefore, metrics.repetitiveCostAfter, metrics.humanCostBefore, metrics.humanCostAfter])
+
+  const marginData = [{ name: 'Margin', before: beforeMarginPct, after: afterMarginPct }]
+
+  /** UI **/
   return (
     <div className="space-y-6">
-      {/* Toggle Switch */}
-      <div className="flex items-center space-x-4">
-        <label htmlFor="toggle-listedit" className="text-sm font-medium">Show with Listedit</label>
-        <input
-          id="toggle-listedit"
-          type="checkbox"
-          checked={showWithListedit}
-          onChange={() => setShowWithListedit(!showWithListedit)}
-          className="toggle toggle-primary"
-        />
+      {/* Header / Toggle */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="rounded-full border-border text-xs">
+            Financial Overview
+          </Badge>
+          <span className="text-sm text-muted-foreground">Interactive scenario view</span>
+        </div>
+        <SegmentedToggle value={scenario} onChange={setScenario} />
       </div>
 
-      {/* Key Metrics Cards */}
+      {/* Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <MetricCard
-            title="Annual Revenue"
-            value={formatCurrency(showWithListedit ? metrics.revenueTotalAfter : metrics.revenueTotalBefore, state.currency)}
-            change={showWithListedit ? `+${formatCurrency(metrics.revenuIncrease, state.currency)} increase` : undefined}
-            isPositive={showWithListedit}
-            icon={<DollarSign className="w-4 h-4 text-muted-foreground" />}
-            description={showWithListedit ? "With Listedit implementation" : "Without Listedit"}
-          />
-        
+        <MetricCard
+          title="Annual Revenue"
+          value={formatCurrency(showWith ? metrics.revenueTotalAfter : metrics.revenueTotalBefore, state.currency)}
+          change={showWith ? `+${formatCurrency(metrics.revenuIncrease, state.currency)} increase` : undefined}
+          isPositive={showWith}
+          icon={<DollarSign className="w-4 h-4" />}
+          description={showWith ? 'With Listedit implementation' : 'Without Listedit'}
+          accent={PALETTE.blue}
+        />
         <MetricCard
           title="Total Cost Savings"
-          value={formatCurrency(showWithListedit ? metrics.costSavings : 0, state.currency)}
-          change={showWithListedit ? `${formatPercentage((metrics.costSavings / metrics.totalCostBefore) * 100)} reduction` : undefined}
-          isPositive={showWithListedit}
-          icon={<Target className="w-4 h-4 text-muted-foreground" />}
-          description={showWithListedit ? "Annual operational savings" : "N/A"}
+          value={formatCurrency(showWith ? metrics.costSavings : 0, state.currency)}
+          change={
+            showWith
+              ? `${formatPercentage((metrics.costSavings / (metrics.totalCostBefore || 1)) * 100)} reduction`
+              : undefined
+          }
+          isPositive={showWith}
+          icon={<Target className="w-4 h-4" />}
+          description={showWith ? 'Annual operational savings' : 'N/A'}
+          accent={PALETTE.green}
         />
-        
         <MetricCard
           title="Net Profit"
-          value={formatCurrency(showWithListedit ? metrics.profitAfter : metrics.profitBefore, state.currency)}
-          change={showWithListedit ? `+${formatCurrency(metrics.totalBenefit, state.currency)} improvement` : undefined}
-          isPositive={showWithListedit}
-          icon={<TrendingUp className="w-4 h-4 text-muted-foreground" />}
-          description={showWithListedit ? "Combined revenue + savings" : undefined}
+          value={formatCurrency(showWith ? metrics.profitAfter : metrics.profitBefore, state.currency)}
+          change={showWith ? `+${formatCurrency(metrics.totalBenefit, state.currency)} improvement` : undefined}
+          isPositive={showWith}
+          icon={<TrendingUp className="w-4 h-4" />}
+          description={showWith ? 'Combined revenue + savings' : undefined}
+          accent={PALETTE.purple}
         />
-        
         <MetricCard
           title="Profit Margin"
-          value={formatPercentage(showWithListedit ? metrics.profitMarginAfter : metrics.profitMarginBefore)}
-          change={showWithListedit ? `+${formatPercentage(metrics.profitMarginAfter - metrics.profitMarginBefore)} improvement` : undefined}
-          isPositive={showWithListedit && metrics.profitMarginAfter > metrics.profitMarginBefore}
-          icon={<Zap className="w-4 h-4 text-muted-foreground" />}
-          description={showWithListedit ? "Efficiency improvement" : undefined}
+          value={`${showWith ? afterMarginPct : beforeMarginPct}%`}
+          change={
+            showWith
+              ? `+${Math.max(0, afterMarginPct - beforeMarginPct)}% improvement`
+              : undefined
+          }
+          isPositive={showWith && afterMarginPct > beforeMarginPct}
+          icon={<Zap className="w-4 h-4" />}
+          description={showWith ? 'Efficiency improvement' : undefined}
+          accent={PALETTE.amber}
         />
       </div>
 
-      {/* Charts Grid */}
+      {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Revenue vs Profit Comparison */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Revenue & Profit Impact</CardTitle>
-            <CardDescription>{showWithListedit ? "With Listedit" : "Without Listedit"}</CardDescription>
+        {/* Revenue & Profit Impact */}
+        <Card className="bg-white border border-gray-200 rounded-xl shadow-sm">
+          <CardHeader className="pb-2 border-b border-gray-200">
+            <CardTitle className="text-base">Revenue & Profit Impact</CardTitle>
+            <CardDescription>{showWith ? 'With Listedit' : 'Without Listedit'}</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-4">
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={profitTrendData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="scenario" />
-                <YAxis tickFormatter={(value) => `${state.currency === 'USD' ? '$' : state.currency === 'AUD' ? 'A$' : 'NZ$'}${(value / 1000000).toFixed(1)}M`} />
-                <Tooltip formatter={(value: number) => formatCurrency(value, state.currency)} />
+              <BarChart data={profitTrendData} barGap={12}>
+                <CartesianGrid stroke={GRID_STROKE} vertical={false} />
+                <XAxis dataKey="scenario" tickLine={false} axisLine={false} />
+                <YAxis
+                  tickFormatter={(v) =>
+                    `${state.currency === 'USD' ? '$' : state.currency === 'AUD' ? 'A$' : 'NZ$'}${(v / 1_000_000).toFixed(1)}M`
+                  }
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <Tooltip wrapperStyle={{ outline: 'none' }} content={(p) => <CurrencyTooltip {...p} currency={state.currency} />} />
                 <Legend />
-                <Bar dataKey="revenue" fill="#10b981" name="Revenue" />
-                <Bar dataKey="profit" fill="#3b82f6" name="Profit" />
+                <Bar dataKey="revenue" name="Revenue" fill={PALETTE.green} radius={[8, 8, 0, 0]} />
+                <Bar dataKey="profit" name="Profit" fill={PALETTE.blue} radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        {/* Cost Reduction Breakdown */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Cost Optimization</CardTitle>
-            <CardDescription>Cost reduction across different categories</CardDescription>
+        {/* Cost Optimization */}
+        <Card className="bg-white border border-gray-200 rounded-xl shadow-sm">
+          <CardHeader className="pb-2 border-b border-gray-200">
+            <CardTitle className="text-base">Cost Optimization</CardTitle>
+            <CardDescription>Reduction across categories</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-4">
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={costComparisonData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="category" />
-                <YAxis tickFormatter={(value) => `${state.currency === 'USD' ? '$' : state.currency === 'AUD' ? 'A$' : 'NZ$'}${(value / 1000).toFixed(0)}K`} />
-                <Tooltip formatter={(value: number) => formatCurrency(value, state.currency)} />
+              <BarChart data={costComparisonData} barCategoryGap="18%">
+                <CartesianGrid stroke={GRID_STROKE} vertical={false} />
+                <XAxis dataKey="category" tickLine={false} axisLine={false} />
+                <YAxis
+                  tickFormatter={(v) =>
+                    `${state.currency === 'USD' ? '$' : state.currency === 'AUD' ? 'A$' : 'NZ$'}${(v / 1_000).toFixed(0)}K`
+                  }
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <Tooltip wrapperStyle={{ outline: 'none' }} content={(p) => <CurrencyTooltip {...p} currency={state.currency} />} />
                 <Legend />
-                <Bar dataKey="before" fill="#ef4444" name="Before" />
-                <Bar dataKey="after" fill="#22c55e" name="After" />
+                <Bar dataKey="before" name="Before" fill={PALETTE.purple} radius={[8, 8, 0, 0]} opacity={showWith ? 0.45 : 1} />
+                <Bar dataKey="after"  name="After"  fill={PALETTE.green}  radius={[8, 8, 0, 0]} opacity={showWith ? 1 : 0.45} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        {/* --- BUG FIX 2: Conditionally render impact charts --- */}
-        {/* These charts are only relevant in the "With Listedit" view. */}
-        {showWithListedit && (
+        {/* Cost Composition (100% stacked) */}
+        <Card className="bg-white border border-gray-200 rounded-xl shadow-sm">
+          <CardHeader className="pb-2 border-b border-gray-200">
+            <CardTitle className="text-base">Cost Composition (Before vs After)</CardTitle>
+            <CardDescription>Normalized to 100%</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <ResponsiveContainer width="100%" height={300}>
+              <ComposedChart data={beforeAfterNormalized}>
+                <CartesianGrid stroke={GRID_STROKE} vertical={false} />
+                <XAxis dataKey="label" tickLine={false} axisLine={false} />
+                <YAxis
+                  domain={[0, 100]}
+                  ticks={[0, 25, 50, 75, 100]}
+                  tickFormatter={(v) => `${v}%`}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <Tooltip content={(p) => {
+                  if (!p.active || !p.payload?.length) return null
+                  const item = p.payload[0].payload
+                  const total = item.Software + item.Repetitive + item.Human || 1
+                  const rows = [
+                    { name: 'Software', v: item.Software, color: PALETTE.blue },
+                    { name: 'Repetitive', v: item.Repetitive, color: PALETTE.amber },
+                    { name: 'Human', v: item.Human, color: PALETTE.sky },
+                  ].map(r => ({ ...r, pct: Math.round((r.v / total) * 100) }))
+                  return (
+                    <div style={{ background: PALETTE.card, color: PALETTE.ink, border: `1px solid ${PALETTE.gray}` , borderRadius: 10, padding: '10px 12px', boxShadow: '0 8px 24px rgba(0,0,0,.12)'}}>
+                      <div className="text-xs opacity-70">{item.label}</div>
+                      {rows.map(r => (
+                        <div key={r.name} className="text-sm"><span className="inline-block w-2 h-2 rounded-full mr-2" style={{ background: r.color }} />{r.name}: {r.pct}%</div>
+                      ))}
+                    </div>
+                  )
+                }} />
+                <Legend />
+                <Bar dataKey="Software"  stackId="a" fill={PALETTE.blue}  radius={0} />
+                <Bar dataKey="Repetitive" stackId="a" fill={PALETTE.amber} radius={0} />
+                <Bar dataKey="Human"      stackId="a" fill={PALETTE.sky}   radius={[6, 6, 0, 0]} />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* 12‑Month Projection */}
+        <Card className="bg-white border border-gray-200 rounded-xl shadow-sm">
+          <CardHeader className="pb-2 border-b border-gray-200">
+            <CardTitle className="text-base">12‑Month Projection</CardTitle>
+            <CardDescription>Revenue & Profit trend</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <ResponsiveContainer width="100%" height={300}>
+              <AreaChart data={monthlyProjection}>
+                <CartesianGrid stroke={GRID_STROKE} vertical={false} />
+                <XAxis dataKey="m" tickLine={false} axisLine={false} />
+                <YAxis
+                  tickFormatter={(v) => `${state.currency === 'USD' ? '$' : state.currency === 'AUD' ? 'A$' : 'NZ$'}${(v / 1_000_000).toFixed(1)}M`}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <Tooltip wrapperStyle={{ outline: 'none' }} content={(p) => <CurrencyTooltip {...p} currency={state.currency} />} />
+                <Legend />
+                <Area type="monotone" dataKey="revenue" name="Revenue" stroke={PALETTE.green} fillOpacity={0.2} fill={PALETTE.green} strokeWidth={2} />
+                <Area type="monotone" dataKey="profit" name="Profit" stroke={PALETTE.blue} fillOpacity={0.2} fill={PALETTE.blue} strokeWidth={2} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* With Listedit only */}
+        {showWith && (
           <>
             {/* Impact Breakdown */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Total Impact Breakdown</CardTitle>
-                <CardDescription>Sources of financial improvement</CardDescription>
+            <Card className="bg-white border border-gray-200 rounded-xl shadow-sm">
+              <CardHeader className="pb-2 border-b border-gray-200">
+                <CardTitle className="text-base">Total Impact Breakdown</CardTitle>
+                <CardDescription>Sources of improvement</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-4">
                 <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
                     <Pie
                       data={impactBreakdownData}
+                      dataKey="value"
+                      nameKey="name"
                       cx="50%"
                       cy="50%"
-                      labelLine={false}
-                      label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
+                      innerRadius={52}
+                      outerRadius={90}
+                      cornerRadius={8}
+                      paddingAngle={2}
                     >
-                      {impactBreakdownData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.fill} />
+                      {impactBreakdownData.map((seg, i) => (
+                        <Cell key={i} fill={seg.fill} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value: number) => formatCurrency(value, state.currency)} />
+                    <Tooltip wrapperStyle={{ outline: 'none' }} content={(p) => <CurrencyTooltip {...p} currency={state.currency} />} />
                   </PieChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
 
-            {/* Profit Growth Over Time */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Profit Growth Over Time</CardTitle>
-                <CardDescription>Projected profit growth based on client acquisition</CardDescription>
+            {/* Profit Margin (Before vs After) — horizontal bars */}
+            <Card className="bg-white border border-gray-200 rounded-xl shadow-sm">
+              <CardHeader className="pb-2 border-b border-gray-200">
+                <CardTitle className="text-base leading-none">Profit Margin (Before vs After)</CardTitle>
+                <CardDescription>Side‑by‑side comparison</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-4">
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={valuationData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="clients" />
-                <YAxis tickFormatter={(value) => `${state.currency === 'USD' ? '$' : state.currency === 'AUD' ? 'A$' : 'NZ$'}${(value / 1000000).toFixed(1)}M`} />
-                <Tooltip formatter={(value: number) => formatCurrency(value, state.currency)} />
-                <Legend />
-                <Bar dataKey="valuation" fill="#f59e0b" name="Valuation" />
-              </BarChart>
+                  <BarChart
+                    data={[
+                      { label: 'Profit Margin', before: beforeMarginPct, after: afterMarginPct }
+                    ]}
+                    layout="vertical"
+                    barCategoryGap="30%"
+                  >
+                    <CartesianGrid stroke={GRID_STROKE} horizontal={false} />
+                    <XAxis
+                      type="number"
+                      domain={[0, 100]}
+                      ticks={[0, 20, 40, 60, 80, 100]}
+                      tickFormatter={(v) => `${v}%`}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <YAxis type="category" dataKey="label" tickLine={false} axisLine={false} />
+                    <Tooltip formatter={(v: any) => `${v}%`} />
+                    <Legend />
+                    <Bar dataKey="before" name="Before" fill={PALETTE.purple} radius={[0, 8, 8, 0]} barSize={18}>
+                      <LabelList dataKey="before" position="right" formatter={(v: any) => `${v}%`} />
+                    </Bar>
+                    <Bar dataKey="after" name="After" fill={PALETTE.green} radius={[0, 8, 8, 0]} barSize={18}>
+                      <LabelList dataKey="after" position="right" formatter={(v: any) => `${v}%`} />
+                    </Bar>
+                  </BarChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>

@@ -1,0 +1,5 @@
+0000000000000000000000000000000000000000 9415b9d1cad82fb535b8ecf51bb92cca8c051838 financial-dashboard <eremeev1992@hotmail.com> 1754815640 +1000	branch: Created from HEAD
+9415b9d1cad82fb535b8ecf51bb92cca8c051838 a1307d7af055bebc5692a606124a7500f5c913cd financial-dashboard <eremeev1992@hotmail.com> 1754816241 +1000	commit: chore(theme): apply amber-minimal variables and tailwind token mappings (manual)
+a1307d7af055bebc5692a606124a7500f5c913cd cf17de09e8b78a8b522ec3fe379a50f586b76d00 financial-dashboard <eremeev1992@hotmail.com> 1754817704 +1000	commit: chore(tailwind): add CLI-safe input, generated CSS import, and dev:css script; map CSS vars to tailwind tokens
+cf17de09e8b78a8b522ec3fe379a50f586b76d00 240e591f2676335fc266c1a1520e64de12bc2cc5 financial-dashboard <eremeev1992@hotmail.com> 1754817854 +1000	commit: chore(tailwind): ignore generated CSS and backups; remove accidental public output
+240e591f2676335fc266c1a1520e64de12bc2cc5 d7c4944252c2d06f546829c833995fc7c73ab179 financial-dashboard <eremeev1992@hotmail.com> 1754818191 +1000	commit: style: hide horizontal scrollbars with .scrollbar-hide utility; ignore built CSS

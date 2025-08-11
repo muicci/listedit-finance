@@ -2,13 +2,13 @@
 
 import React from 'react'
 import { ListeditProvider } from '@/contexts/ListeditContext'
-import Presentation from '@/components/presentation/Presentation'
+import ListeditDashboard from '@/components/ListeditDashboard' // dashboard root
 
 export default function Home() {
   return (
     <ListeditProvider>
-      <main className="min-h-screen bg-background text-foreground">
-        <Presentation />
+      <main className="container mx-auto px-4 py-6">
+        <ListeditDashboard />
       </main>
     </ListeditProvider>
   )

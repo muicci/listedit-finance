@@ -1,0 +1,4 @@
+0000000000000000000000000000000000000000 d7c4944252c2d06f546829c833995fc7c73ab179 financial-dashboard <eremeev1992@hotmail.com> 1754818353 +1000	branch: Created from HEAD
+d7c4944252c2d06f546829c833995fc7c73ab179 912c3af6cc76976cfd0f3836482ff50039b955ed financial-dashboard <eremeev1992@hotmail.com> 1754818406 +1000	commit: feat(theme): add Supabase theme via shadcn (components.json + src/input.css)
+912c3af6cc76976cfd0f3836482ff50039b955ed ec439ae3ae75fdaf0487f16677f22e2201b94552 financial-dashboard <eremeev1992@hotmail.com> 1754819887 +1000	commit: chore(theme): unify variables in src/input.css and load Outfit font in layout
+ec439ae3ae75fdaf0487f16677f22e2201b94552 4dcfc67a1be3a8eabc16561738833a6954084327 financial-dashboard <eremeev1992@hotmail.com> 1754821113 +1000	commit: feat(charts): tree-shaken Chart.js registration and chartjs types shim; load Outfit font

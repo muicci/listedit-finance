@@ -1,0 +1,7 @@
+0000000000000000000000000000000000000000 b8632140c3e40fa05b8f5dd192604952a389bd36 financial-dashboard <eremeev1992@hotmail.com> 1754811994 +1000	branch: Created from HEAD
+b8632140c3e40fa05b8f5dd192604952a389bd36 205d74a94579de870ad0b6ca41b2da429673505e financial-dashboard <eremeev1992@hotmail.com> 1754811994 +1000	commit: chore(cleanup): start cleanup - trim deploy/workspace files
+205d74a94579de870ad0b6ca41b2da429673505e 0a6d3047616953b6bc0fa72b2527316acdec5b1a financial-dashboard <eremeev1992@hotmail.com> 1754812101 +1000	commit: chore(cleanup): remove deployment configs and financial-dashboard workspace
+0a6d3047616953b6bc0fa72b2527316acdec5b1a a80aaf05fa782787b9230d8738e2a7d52c477cd9 financial-dashboard <eremeev1992@hotmail.com> 1754813063 +1000	commit: feat: make presentation the root page (includes dashboard slide)
+a80aaf05fa782787b9230d8738e2a7d52c477cd9 503ae5d93bf0e34cc754b2983e2d4f93f27a64e1 financial-dashboard <eremeev1992@hotmail.com> 1754813405 +1000	commit: chore: remove duplicate slides and fix Chart.js dynamic import
+503ae5d93bf0e34cc754b2983e2d4f93f27a64e1 bba464c661cb4591fbc67f706ba76bb50caae252 financial-dashboard <eremeev1992@hotmail.com> 1754813564 +1000	commit: chore: add tailwind.config.js
+bba464c661cb4591fbc67f706ba76bb50caae252 9415b9d1cad82fb535b8ecf51bb92cca8c051838 financial-dashboard <eremeev1992@hotmail.com> 1754814653 +1000	commit: chore: silence TS ESLint 'any' warnings; add Tailwind configs

@@ -91,7 +91,51 @@ export function NumbersTab() {
 
   return (
     <div className="space-y-6">
-      <Card>
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="bg-white rounded-lg border border-green-400">
+          <CardContent className="p-6">
+            <div className="text-center space-y-2">
+              <h3 className="font-semibold text-green-900">Revenue Increase</h3>
+              <p className="text-2xl font-bold text-green-800">
+                {formatCurrency(metrics.revenuIncrease, state.currency)}
+              </p>
+              <p className="text-sm text-green-700">
+                {formatPercentage((metrics.revenuIncrease / metrics.revenueTotalBefore) * 100)} improvement
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white rounded-lg border border-blue-400">
+          <CardContent className="p-6">
+            <div className="text-center space-y-2">
+              <h3 className="font-semibold text-blue-900">Cost Savings</h3>
+              <p className="text-2xl font-bold text-blue-800">
+                {formatCurrency(metrics.costSavings, state.currency)}
+              </p>
+              <p className="text-sm text-blue-700">
+                {formatPercentage((metrics.costSavings / metrics.totalCostBefore) * 100)} reduction
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white rounded-lg border border-purple-400">
+          <CardContent className="p-6">
+            <div className="text-center space-y-2">
+              <h3 className="font-semibold text-purple-900">Total Benefit</h3>
+              <p className="text-2xl font-bold text-purple-800">
+                {formatCurrency(metrics.totalBenefit, state.currency)}
+              </p>
+              <p className="text-sm text-purple-700">
+                Combined impact
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+      <Card className="bg-white rounded-lg">
         <CardHeader>
           <CardTitle>Financial Comparison</CardTitle>
           <CardDescription>
@@ -152,53 +196,8 @@ export function NumbersTab() {
         </CardContent>
       </Card>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border-green-200 bg-green-50">
-          <CardContent className="p-6">
-            <div className="text-center space-y-2">
-              <h3 className="font-semibold text-green-900">Revenue Increase</h3>
-              <p className="text-2xl font-bold text-green-800">
-                {formatCurrency(metrics.revenuIncrease, state.currency)}
-              </p>
-              <p className="text-sm text-green-700">
-                {formatPercentage((metrics.revenuIncrease / metrics.revenueTotalBefore) * 100)} improvement
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-blue-200 bg-blue-50">
-          <CardContent className="p-6">
-            <div className="text-center space-y-2">
-              <h3 className="font-semibold text-blue-900">Cost Savings</h3>
-              <p className="text-2xl font-bold text-blue-800">
-                {formatCurrency(metrics.costSavings, state.currency)}
-              </p>
-              <p className="text-sm text-blue-700">
-                {formatPercentage((metrics.costSavings / metrics.totalCostBefore) * 100)} reduction
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-purple-200 bg-purple-50">
-          <CardContent className="p-6">
-            <div className="text-center space-y-2">
-              <h3 className="font-semibold text-purple-900">Total Benefit</h3>
-              <p className="text-2xl font-bold text-purple-800">
-                {formatCurrency(metrics.totalBenefit, state.currency)}
-              </p>
-              <p className="text-sm text-purple-700">
-                Combined impact
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* Agent Breakdown */}
-      <Card>
+      <Card className="bg-white rounded-lg">
         <CardHeader>
           <CardTitle>Agent Performance Breakdown</CardTitle>
           <CardDescription>Revenue impact by agent segment</CardDescription>

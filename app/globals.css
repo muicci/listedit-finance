@@ -64,6 +64,7 @@
 
 body {
   letter-spacing: var(--tracking-normal);
+  background-color: #f8f9fa; /* Slight grey background for contrast */
 }
 
 /* Hide horizontal scrollbar for overflow-x areas (utility used in the project) */
